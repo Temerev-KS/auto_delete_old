@@ -1,11 +1,11 @@
 import arrow
-import os
+import shutil
 from pathlib import Path
 from datetime import datetime
 
 
 FILES_PATH: Path = Path("//192.168.0.98/ftp")
-CRITICAL_TIME = arrow.now().shift(days=-31)  # returns time in format 2021-10-20T16:59:27.833144+03:00
+CRITICAL_TIME = arrow.now().shift(days=-35)  # returns time in format 2021-10-20T16:59:27.833144+03:00
 FOLDER_LIST = []
 
 
@@ -20,7 +20,7 @@ def delete_files(path, c_time):
                 # log it
                 FOLDER_LIST.append(item.resolve().__str__())
                 # remove it
-                os.remove(item.resolve())
+                shutil.rmtree(item.resolve())
 
 
 def write_folder_list():
@@ -28,7 +28,10 @@ def write_folder_list():
     log_path: Path = Path(f'log/folder_list_{current_time_string}.txt')
     with open(log_path, 'w') as file:
         for i in FOLDER_LIST:
-            file.write(f'{i}\n')
+            try:
+                file.write(f'{i}\n')
+            except UnicodeEncodeError:
+                file.write('UNKNOWN CHARACTERS IN PATH\n')
 
 
 if __name__ == '__main__':
